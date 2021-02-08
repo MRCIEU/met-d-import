@@ -20,7 +20,7 @@ table(dat$`Name in TSV` %in% ao$trait)
 table(dat$`Biomarker name` %in% ao$trait)
 
 a <- tibble(
-	id = paste0("med-d-", dat$`Name in TSV`),
+	id = paste0("met-d-", dat$`Name in TSV`),
 	sample.size = 400000,
 	sex =  "Males and females",
 	category = "Continuous",
