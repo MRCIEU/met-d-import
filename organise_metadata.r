@@ -2,7 +2,7 @@ library(jsonlite)
 library(dplyr)
 library(readxl)
 library(ieugwasr)
-
+library(glue)
 ao <- gwasinfo()
 
 datadir <- read_json("config.json")$datadir
@@ -19,9 +19,17 @@ all(file.exists(file.path(datadir, "ready", dat$filename)))
 table(dat$`Name in TSV` %in% ao$trait)
 table(dat$`Biomarker name` %in% ao$trait)
 
+cmd <- glue("grep 'Number of individuals used in analysis' {datadir}/ready/*log | sed 's@:Number of individuals used in analysis: Nused =@@g' > temp.txt")
+system(cmd)
+nid <- readr::read_table2("temp.txt", col_names=c("filename", "nid")) %>%
+	mutate(filename=basename(filename) %>% gsub("log", "imputed.txt.gz", .)) %>%
+	filter(!duplicated(filename))
+table(nid$filename %in% dat$filename)
+dat <- inner_join(dat, nid, by="filename")
+
 a <- tibble(
 	id = paste0("met-d-", dat$`Name in TSV`),
-	sample.size = 400000,
+	sample_size = dat$nid,
 	sex =  "Males and females",
 	category = "Continuous",
 	subcategory = "NA",
